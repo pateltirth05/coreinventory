@@ -11,9 +11,11 @@ from routes.auth_routes import router as auth_router
 from routes.movement_routes import router as movement_router
 from routes.alert_routes import router as alert_router
 from routes.operation_routes import router as operation_router
+from routes.password_routes import router as password_router
 from routes.profile_routes import router as profile_router
 app = FastAPI(title="Inventory Management System")
 
+app.include_router(password_router)
 app.include_router(operation_router)
 app.include_router(product_router)
 app.include_router(warehouse_router)

@@ -30,3 +30,16 @@ def login_user(db, login_data):
     token = create_access_token({"user_id": user.id})
 
     return {"access_token": token}
+
+def reset_password(db, email: str, new_password: str):
+
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        raise Exception("User not found")
+
+    user.password = hash_password(new_password)
+
+    db.commit()
+
+    return {"message": "Password updated"}
