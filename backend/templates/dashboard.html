@@ -1,72 +1,287 @@
-<script id="auth_guard">
-const token = localStorage.getItem("token")
-
-if(!token){
-    window.location.href="/login"
-}
-</script>
 {% extends "layout.html" %}
 
 {% block content %}
 
-<h3 class="mb-4">Dashboard</h3>
+<div class="container-fluid">
 
-<div class="row">
-
-<div class="col-md-3">
-<div class="card shadow">
-<div class="card-body text-center">
-<h6>Total Stock</h6>
-<h3 id="totalStock">0</h3>
-</div>
-</div>
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+<h4 class="fw-bold mb-0">Dashboard</h4>
+<p class="text-muted small">Inventory overview and activity</p>
 </div>
 
-<div class="col-md-3">
-<div class="card shadow">
-<div class="card-body text-center">
-<h6>Low Stock</h6>
-<h3 id="lowStock">0</h3>
+<a href="/receipts" class="btn btn-primary">
+<i class="bi bi-plus-lg"></i> New Receipt
+</a>
 </div>
-</div>
-</div>
+
+<!-- KPI CARDS -->
+<div class="row g-4 mb-4">
 
 <div class="col-md-3">
-<div class="card shadow">
-<div class="card-body text-center">
-<h6>Receipts</h6>
-<h3 id="receipts">0</h3>
-</div>
+<div class="stat-card">
+<div class="stat-number" id="kpiStock">0</div>
+<div class="stat-label">Total Products in Stock</div>
 </div>
 </div>
 
 <div class="col-md-3">
-<div class="card shadow">
-<div class="card-body text-center">
-<h6>Deliveries</h6>
-<h3 id="deliveries">0</h3>
+<div class="stat-card">
+<div class="stat-number text-warning" id="kpiLow">0</div>
+<div class="stat-label">Low / Out of Stock</div>
 </div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card">
+<div class="stat-number text-primary" id="kpiReceipts">0</div>
+<div class="stat-label">Pending Receipts</div>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="stat-card">
+<div class="stat-number text-danger" id="kpiDeliveries">0</div>
+<div class="stat-label">Pending Deliveries</div>
 </div>
 </div>
 
 </div>
+
+
+<div class="row g-4">
+
+<!-- RECENT OPERATIONS -->
+<div class="col-lg-7">
+
+<div class="table-card">
+
+<h6 class="fw-bold mb-3">Recent Operations</h6>
+
+<table class="table table-sm">
+
+<thead class="table-light">
+<tr>
+<th>ID</th>
+<th>Type</th>
+<th>Status</th>
+<th>Source</th>
+<th>Destination</th>
+</tr>
+</thead>
+
+<tbody id="operationsTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- RIGHT SIDE -->
+<div class="col-lg-5">
+
+<!-- LOW STOCK -->
+<div class="table-card mb-4">
+
+<h6 class="fw-bold mb-3">Low Stock Alert</h6>
+
+<div id="lowStockList"></div>
+
+</div>
+
+
+<!-- ACTIVITY -->
+<div class="table-card">
+
+<h6 class="fw-bold mb-3">Recent Activity</h6>
+
+<div id="activityTimeline"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 
 <script>
 
-async function loadDashboard(){
+/* TOKEN */
 
-const response = await fetch("/api/v1/dashboard")
-const data = await response.json()
 
-document.getElementById("totalStock").innerText = data.total_stock
-document.getElementById("lowStock").innerText = data.low_stock_products
-document.getElementById("receipts").innerText = data.receipts
-document.getElementById("deliveries").innerText = data.deliveries
+
+/* API HELPER */
+async function apiGet(endpoint){
+
+    try{
+
+        const token = localStorage.getItem("token")
+
+        if(!token){
+            window.location="/login"
+            return
+        }
+
+        const res = await fetch("/api/v1" + endpoint,{
+            method:"GET",
+            headers:{
+                "Authorization":"Bearer " + token,
+                "Content-Type":"application/json"
+            }
+        })
+
+        if(res.status === 401){
+            localStorage.removeItem("token")
+            window.location="/login"
+            return
+        }
+
+        const text = await res.text()
+
+        try{
+            return JSON.parse(text)
+        }catch(err){
+            console.error("Server returned HTML instead of JSON:")
+            console.log(text)
+            throw new Error("Invalid JSON response")
+        }
+
+    }catch(err){
+
+        console.error("API error:",err)
+
+    }
 
 }
 
+/* DASHBOARD KPIs */
+
+async function loadDashboard(){
+
+const data = await apiGet("/dashboard")
+
+if(!data) return
+
+document.getElementById("kpiStock").innerText = data.total_stock
+document.getElementById("kpiLow").innerText = data.low_stock_products
+document.getElementById("kpiReceipts").innerText = data.receipts
+document.getElementById("kpiDeliveries").innerText = data.deliveries
+
+}
+
+
+
+/* LOW STOCK */
+
+async function loadLowStock(){
+
+const items = await apiGet("/alerts/low-stock")
+
+if(!items) return
+
+const container = document.getElementById("lowStockList")
+
+container.innerHTML=""
+
+items.forEach(item=>{
+
+container.innerHTML +=`
+<div class="d-flex justify-content-between border-bottom py-2">
+
+<span>${item.product_name}</span>
+
+<span class="badge bg-danger">${item.current_stock}</span>
+
+</div>
+`
+
+})
+
+}
+
+
+
+/* OPERATIONS TABLE */
+
+async function loadOperations(){
+
+const ops = await apiGet("/operations")
+
+if(!ops) return
+
+const table = document.getElementById("operationsTable")
+
+table.innerHTML=""
+
+ops.slice(0,8).forEach(op=>{
+
+table.innerHTML += `
+<tr>
+
+<td>${op.id}</td>
+
+<td>${op.type}</td>
+
+<td>${op.status}</td>
+
+<td>${op.source_warehouse || "-"}</td>
+
+<td>${op.destination_warehouse || "-"}</td>
+
+</tr>
+`
+
+})
+
+}
+
+
+
+/* ACTIVITY TIMELINE */
+
+async function loadActivity(){
+
+const moves = await apiGet("/movements")
+
+if(!moves) return
+
+const timeline = document.getElementById("activityTimeline")
+
+timeline.innerHTML=""
+
+moves.slice(0,6).forEach(m=>{
+
+timeline.innerHTML += `
+<div class="border-bottom py-2">
+
+<strong>${m.movement_type}</strong>
+
+<div class="small text-muted">
+Product ${m.product_id} — Qty ${m.quantity}
+</div>
+
+</div>
+`
+
+})
+
+}
+
+
+
+/* INITIAL LOAD */
+
 loadDashboard()
+loadLowStock()
+loadOperations()
+loadActivity()
 
 </script>
+
 
 {% endblock %}

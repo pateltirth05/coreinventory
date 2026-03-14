@@ -1,60 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Inventory System</title>
+<title>StockFlow IMS</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<!-- BOOTSTRAP -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- ICONS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
 <style>
+
+/* GLOBAL */
 
 body{
 background:#f4f6f9;
 font-family:system-ui;
+overflow-x:hidden;
 }
-i{
-   padding-right: 10px;
+
+.app{
+display:flex;
+min-height:100vh;
 }
+
+/* SIDEBAR */
+
 .sidebar{
-height:100vh;
-width:240px;
-position:fixed;
+width:260px;
 background:#111827;
 color:white;
+display:flex;
+flex-direction:column;
+position:fixed;
+height:100vh;
 }
 
-.sidebar h4{
-font-weight:600;
+.sidebar-logo{
+padding:20px;
+font-weight:700;
+font-size:18px;
+border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
-.sidebar a{
-display:block;
-padding:14px 18px;
-color:#d1d5db;
-text-decoration:none;
-font-size:15px;
+.sidebar-nav{
+padding:10px;
+flex:1;
 }
 
-.sidebar a:hover{
+.nav-link{
+color:#cbd5e1;
+font-size:14px;
+border-radius:8px;
+padding:10px 14px;
+margin-bottom:6px;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.nav-link:hover{
 background:#1f2937;
 color:white;
 }
 
-.navbar{
-margin-left:240px;
+.nav-link.active{
+background:#2563eb;
+color:white;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+margin-left:260px;
+display:flex;
+flex-direction:column;
+}
+
+/* TOPBAR */
+
+.topbar{
+height:65px;
 background:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 25px;
 border-bottom:1px solid #e5e7eb;
 }
 
-.content{
-margin-left:240px;
-padding:30px;
+.topbar-search{
+width:280px;
 }
 
-.card{
-border:none;
+.topbar-search input{
+border-radius:8px;
+}
+
+/* CONTENT */
+
+.content{
+padding:25px;
+}
+
+/* CARDS */
+
+.stat-card{
+background:white;
 border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.05);
+padding:20px;
+box-shadow:0 4px 14px rgba(0,0,0,0.05);
+}
+
+.stat-number{
+font-size:28px;
+font-weight:700;
+}
+
+.stat-label{
+font-size:13px;
+color:#6b7280;
+}
+
+/* TABLE */
+
+.table-card{
+background:white;
+border-radius:12px;
+box-shadow:0 4px 14px rgba(0,0,0,0.05);
+padding:20px;
 }
 
 </style>
@@ -63,33 +141,179 @@ box-shadow:0 5px 15px rgba(0,0,0,0.05);
 
 <body>
 
-<div class="sidebar">
+<div class="app">
 
-<h4 class="text-center py-3">Inventory</h4>
-<a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-<a href="/products"><i class="bi bi-box"></i> Products</a>
-<a href="/operations"><i class="bi bi-arrow-left-right"></i> Operations</a>
-<a href="/warehouses"><i class="bi bi-building"></i> Warehouses</a>
-<a href="/profile"><i class="bi bi-person"></i> Profile</a>
-<button onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</button>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+<div class="sidebar-logo">
+<i class="bi bi-box-seam"></i> StockFlow
 </div>
 
-<nav class="navbar navbar-light bg-light shadow-sm">
-<div class="container-fluid">
-<span class="navbar-brand">Inventory Management System</span>
-</div>
-</nav>
+<div class="sidebar-nav">
 
+<a href="/dashboard" class="nav-link active">
+<i class="bi bi-speedometer2"></i> Dashboard
+</a>
+
+<a href="/products" class="nav-link">
+<i class="bi bi-box"></i> Products
+</a>
+
+<a href="/receipts" class="nav-link">
+<i class="bi bi-box-arrow-in-down"></i> Receipts
+</a>
+
+<a href="/deliveries" class="nav-link">
+<i class="bi bi-box-arrow-up"></i> Deliveries
+</a>
+
+<a href="/transfers" class="nav-link">
+<i class="bi bi-arrow-left-right"></i> Transfers
+</a>
+
+<a href="/adjustments" class="nav-link">
+<i class="bi bi-pencil-square"></i> Adjustments
+</a>
+
+<a href="/history" class="nav-link">
+<i class="bi bi-clock-history"></i> Move History
+</a>
+
+<a href="/profile" class="nav-link">
+<i class="bi bi-person"></i> Profile
+</a>
+
+</div>
+
+<div class="p-3 border-top">
+
+<button onclick="logout()" class="btn btn-outline-danger w-100">
+<i class="bi bi-box-arrow-right"></i> Logout
+</button>
+
+</div>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+
+<div class="topbar-search">
+<input class="form-control" placeholder="Search inventory..." id="globalSearch">
+</div>
+
+<div class="d-flex align-items-center gap-3">
+
+<i class="bi bi-bell fs-5"></i>
+
+<div class="d-flex align-items-center gap-2">
+
+<div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+style="width:35px;height:35px;font-size:14px;" id="avatar">
+U
+</div>
+
+<div>
+
+<div style="font-size:14px;font-weight:600;" id="username">
+User
+</div>
+
+<div style="font-size:12px;color:#6b7280;" id="userrole">
+Role
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PAGE CONTENT -->
 <div class="content">
 
-{% block content %}{% endblock %}
+{% block content %}
+
+{% endblock %}
 
 </div>
-<script id="logout_script">
-function logout(){
-    localStorage.removeItem("token")
-    window.location.href="/login"
+
+</div>
+
+</div>
+
+<script>
+
+/* AUTH GUARD */
+
+const token = localStorage.getItem("token")
+
+if(!token){
+window.location="/login"
 }
+
+/* API HELPER */
+
+const API="/api/v1"
+
+async function apiGet(url){
+
+const res = await fetch(API+url,{
+headers:{
+"Authorization":"Bearer "+token
+}
+})
+
+return res.json()
+
+}
+
+/* PROFILE */
+
+async function loadProfile(){
+
+const user = await apiGet("/profile")
+document.getElementById("username").innerText=user.name
+document.getElementById("userrole").innerText=user.role
+document.getElementById("avatar").innerText=user.name[0]
+
+}
+
+loadProfile()
+
+/* LOGOUT */
+
+function logout(){
+
+localStorage.removeItem("token")
+
+window.location="/login"
+
+}
+
+/* GLOBAL SEARCH */
+
+document.getElementById("globalSearch").addEventListener("keyup",async function(e){
+
+const q=e.target.value
+
+if(q.length<2) return
+
+const res=await fetch(API+"/products/search?keyword="+q)
+
+const data=await res.json()
+
+console.log("Search results:",data)
+
+})
+
 </script>
+
 </body>
 </html>
