@@ -9,6 +9,7 @@ from routes.adjustment_routes import router as adjustment_router
 from routes.dashboard_routes import router as dashboard_router
 from routes.auth_routes import router as auth_router
 from routes.movement_routes import router as movement_router
+from routes.alert_routes import router as alert_router
 app = FastAPI(title="Inventory Management System")
 
 app.include_router(product_router)
@@ -21,6 +22,7 @@ app.include_router(adjustment_router)
 app.include_router(dashboard_router)
 app.include_router(auth_router)
 app.include_router(movement_router)
+app.include_router(alert_router)
 @app.get("/")
 def root():
     return {"message": "Inventory API running"}
