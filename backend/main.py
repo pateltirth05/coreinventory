@@ -10,8 +10,10 @@ from routes.dashboard_routes import router as dashboard_router
 from routes.auth_routes import router as auth_router
 from routes.movement_routes import router as movement_router
 from routes.alert_routes import router as alert_router
+from routes.operation_routes import router as operation_router
 app = FastAPI(title="Inventory Management System")
 
+app.include_router(operation_router)
 app.include_router(product_router)
 app.include_router(warehouse_router)
 app.include_router(stock_router)
