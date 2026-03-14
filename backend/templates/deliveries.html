@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h4>Deliveries</h4>
+
+<button class="btn btn-danger" onclick="createDelivery()">Deliver Stock</button>
+
+<script>
+
+async function createDelivery(){
+
+const product = prompt("Product ID")
+const qty = prompt("Quantity")
+const source = prompt("Warehouse ID")
+
+await fetch("/api/v1/deliveries",{
+method:"POST",
+headers:{
+"Authorization":"Bearer "+localStorage.getItem("token"),
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+source_warehouse:source,
+items:[
+{
+product_id:product,
+quantity:qty
+}
+]
+})
+})
+
+alert("Delivery completed")
+
+}
+
+</script>
+
+{% endblock %}

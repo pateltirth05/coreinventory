@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h4>Stock Adjustments</h4>
+
+<button class="btn btn-secondary" onclick="adjustStock()">Adjust Stock</button>
+
+<script>
+
+async function adjustStock(){
+
+const product = prompt("Product ID")
+const qty = prompt("Adjustment quantity")
+const warehouse = prompt("Warehouse")
+
+await fetch("/api/v1/adjustments",{
+method:"POST",
+headers:{
+"Authorization":"Bearer "+localStorage.getItem("token"),
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+warehouse_id:warehouse,
+items:[
+{
+product_id:product,
+quantity:qty
+}
+]
+})
+})
+
+alert("Stock adjusted")
+
+}
+
+</script>
+
+{% endblock %}

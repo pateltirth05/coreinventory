@@ -54,3 +54,37 @@ def signup_page(request: Request):
 @app.get("/forgot-password")
 def forgot_password_page(request: Request):
     return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+@app.get("/products")
+def products_page(request: Request):
+    return templates.TemplateResponse("products.html", {"request": request})
+
+
+@app.get("/receipts")
+def receipts_page(request: Request):
+    return templates.TemplateResponse("receipts.html", {"request": request})
+
+
+@app.get("/deliveries")
+def deliveries_page(request: Request):
+    return templates.TemplateResponse("deliveries.html", {"request": request})
+
+
+@app.get("/transfers")
+def transfers_page(request: Request):
+    return templates.TemplateResponse("transfers.html", {"request": request})
+
+
+@app.get("/adjustments")
+def adjustments_page(request: Request):
+    return templates.TemplateResponse("adjustments.html", {"request": request})
+
+
+@app.get("/history")
+def history_page(request: Request):
+    return templates.TemplateResponse("history.html", {"request": request})
+
+
+@app.get("/profile")
+def profile_page(request: Request):
+    return templates.TemplateResponse("profile.html", {"request": request})

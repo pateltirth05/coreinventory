@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h4>Stock Movement History</h4>
+
+<table class="table table-striped">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Product</th>
+<th>Type</th>
+<th>Quantity</th>
+</tr>
+</thead>
+
+<tbody id="historyTable"></tbody>
+
+</table>
+
+<script>
+
+async function loadHistory(){
+
+const data = await apiGet("/movements")
+
+let html=""
+
+data.forEach(m=>{
+html += 
+<tr>
+<td>${m.id}</td>
+<td>${m.product_id}</td>
+<td>${m.movement_type}</td>
+<td>${m.quantity}</td>
+</tr>
+
+})
+
+document.getElementById("historyTable").innerHTML = html
+
+}
+
+loadHistory()
+
+</script>
+
+{% endblock %}

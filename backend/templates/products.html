@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+<h4 class="fw-bold">Products</h4>
+
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+<i class="bi bi-plus"></i> New Product
+</button>
+
+</div>
+
+
+<input class="form-control mb-3" placeholder="Search product..." id="searchBox" onkeyup="searchProduct()">
+
+
+<div class="card shadow-sm">
+
+<div class="card-body">
+
+<table class="table table-hover">
+
+<thead class="table-light">
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>SKU</th>
+<th>Category</th>
+<th>Unit</th>
+<th>Actions</th>
+</tr>
+
+</thead>
+
+<tbody id="productTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- PRODUCT MODAL -->
+
+<div class="modal fade" id="productModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title" id="modalTitle">Create Product</h5>
+
+<button class="btn-close" data-bs-dismiss="modal"></button>
+
+</div>
+
+
+<div class="modal-body">
+
+<input type="hidden" id="productId">
+
+
+<div class="mb-2">
+<label>Product Name</label>
+<input class="form-control" id="pName">
+</div>
+
+<div class="mb-2">
+<label>SKU</label>
+<input class="form-control" id="pSku">
+</div>
+
+<div class="mb-2">
+<label>Category</label>
+<input class="form-control" id="pCategory">
+</div>
+
+<div class="mb-2">
+<label>Unit</label>
+<input class="form-control" id="pUnit">
+</div>
+
+</div>
+
+
+<div class="modal-footer">
+
+<button class="btn btn-secondary" data-bs-dismiss="modal">
+Cancel
+</button>
+
+<button class="btn btn-primary" onclick="saveProduct()">
+Save
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+async function loadProducts(){
+
+const res = await fetch("/api/v1/products",{
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+})
+
+const products = await res.json()
+
+let html=""
+
+products.forEach(p=>{
+
+html += `
+<tr>
+
+<td>${p.id}</td>
+<td>${p.name}</td>
+<td>${p.sku}</td>
+<td>${p.category}</td>
+<td>${p.unit}</td>
+
+<td>
+
+<button class="btn btn-sm btn-warning"
+onclick="openEdit(${p.id},'${p.name}','${p.sku}','${p.category}','${p.unit}')">
+
+<i class="bi bi-pencil"></i>
+
+</button>
+
+<button class="btn btn-sm btn-danger"
+onclick="deleteProduct(${p.id})">
+
+<i class="bi bi-trash"></i>
+
+</button>
+
+</td>
+
+</tr>
+`
+
+})
+
+document.getElementById("productTable").innerHTML = html
+
+}
+
+loadProducts()
+
+
+
+function searchProduct(){
+
+const input = document.getElementById("searchBox").value.toLowerCase()
+
+const rows = document.querySelectorAll("#productTable tr")
+
+rows.forEach(row=>{
+
+if(row.innerText.toLowerCase().includes(input)){
+row.style.display=""
+}else{
+row.style.display="none"
+}
+
+})
+
+}
+
+
+
+function openEdit(id,name,sku,category,unit){
+
+document.getElementById("modalTitle").innerText="Edit Product"
+
+document.getElementById("productId").value=id
+document.getElementById("pName").value=name
+document.getElementById("pSku").value=sku
+document.getElementById("pCategory").value=category
+document.getElementById("pUnit").value=unit
+
+new bootstrap.Modal(document.getElementById("productModal")).show()
+
+}
+
+
+
+async function saveProduct(){
+
+const id=document.getElementById("productId").value
+const name=document.getElementById("pName").value
+const sku=document.getElementById("pSku").value
+const category=document.getElementById("pCategory").value
+const unit=document.getElementById("pUnit").value
+
+let url="/api/v1/products"
+let method="POST"
+
+if(id){
+
+url="/api/v1/products/"+id
+method="PUT"
+
+}
+
+await fetch(url,{
+method:method,
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token"),
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+name:name,
+sku:sku,
+category:category,
+unit:unit
+})
+})
+
+const modal = bootstrap.Modal.getInstance(document.getElementById("productModal"))
+modal.hide()
+
+loadProducts()
+
+}
+
+
+
+async function deleteProduct(id){
+
+if(!confirm("Delete this product?")) return
+
+await fetch("/api/v1/products/"+id,{
+method:"DELETE",
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+})
+
+loadProducts()
+
+}
+
+</script>
+
+{% endblock %}

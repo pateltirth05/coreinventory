@@ -1,0 +1,256 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+<div class="d-flex justify-content-between mb-3">
+<h4>Receipts (Incoming Stock)</h4>
+
+<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#receiptModal">
+Receive Stock
+</button>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+<th>Product</th>
+<th>Supplier</th>
+<th>Warehouse</th>
+<th>Quantity</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="receiptTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- RECEIPT MODAL -->
+
+<div class="modal fade" id="receiptModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h5>Receive Goods</h5>
+<button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+
+<div class="modal-body">
+
+<div class="mb-2">
+<label>Supplier</label>
+<input class="form-control" id="supplier">
+</div>
+
+
+<div class="mb-2">
+<label>Product</label>
+<select class="form-select" id="product"></select>
+</div>
+
+
+<div class="mb-2">
+<label>Warehouse</label>
+<select class="form-select" id="warehouse"></select>
+</div>
+
+
+<div class="mb-2">
+<label>Quantity</label>
+<input type="number" class="form-control" id="quantity">
+</div>
+
+</div>
+
+
+<div class="modal-footer">
+
+<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+<button class="btn btn-success" onclick="createReceipt()">Submit</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+/* LOAD PRODUCTS */
+
+async function loadProducts(){
+
+const res = await fetch("/api/v1/products/",{
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+})
+
+const data = await res.json()
+
+let html=""
+
+data.forEach(p=>{
+html +=` <option value="${p.id}">${p.name}</option>`
+})
+
+document.getElementById("product").innerHTML = html
+
+}
+
+
+
+/* LOAD WAREHOUSES */
+
+async function loadWarehouses(){
+
+const res = await fetch("/api/v1/warehouses/",{
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+})
+
+const data = await res.json()
+
+let html=""
+
+data.forEach(w=>{
+html += `<option value="${w.id}">${w.name}</option>`
+})
+
+document.getElementById("warehouse").innerHTML = html
+
+}
+
+
+
+/* CREATE RECEIPT */
+
+async function createReceipt(){
+
+const supplier = document.getElementById("supplier").value
+
+const productSelect = document.getElementById("product")
+const productId = productSelect.value
+const productName = productSelect.options[productSelect.selectedIndex].text
+
+const warehouseSelect = document.getElementById("warehouse")
+const warehouseId = warehouseSelect.value
+const warehouseName = warehouseSelect.options[warehouseSelect.selectedIndex].text
+
+const quantity = document.getElementById("quantity").value
+
+
+if(!productId || !warehouseId ||  !quantity){
+
+alert("Please fill all fields")
+return
+
+}
+
+
+await fetch("/api/v1/receipts",{
+
+method:"POST",
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token"),
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+destination_warehouse:parseInt(warehouseId),
+
+items:[
+{
+product_id:parseInt(productId),
+quantity:parseInt(quantity)
+}
+]
+
+})
+
+})
+
+
+
+/* ADD ROW TO TABLE */
+
+const table = document.getElementById("receiptTable")
+
+alert("Receipt created successfully")
+
+}
+async function loadReceipts(){
+
+const res = await fetch("/api/v1/movements",{
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+})
+
+const data = await res.json()
+
+let html=""
+
+data.forEach(m=>{
+
+if(m.movement_type !== "IN") return
+
+html += `
+<tr>
+
+<td>${m.product_name || "Product "+m.product_id}</td>
+
+<td>-</td>
+
+<td>Warehouse ${m.warehouse_id}</td>
+
+<td>${m.quantity}</td>
+
+<td><span class="badge bg-success">done</span></td>
+
+</tr>
+`
+
+})
+
+document.getElementById("receiptTable").innerHTML = html
+
+}
+
+loadProducts()
+loadWarehouses()
+loadReceipts()
+</script>
+
+{% endblock %}

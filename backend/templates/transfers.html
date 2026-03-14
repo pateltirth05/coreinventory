@@ -1,0 +1,301 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container-fluid">
+
+<div class="d-flex justify-content-between mb-3">
+
+<h4>Internal Transfers</h4>
+
+<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
+Transfer Stock
+</button>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-body">
+
+<table class="table table-hover">
+
+<thead>
+
+<tr>
+<th>Product</th>
+<th>From Warehouse</th>
+<th>To Warehouse</th>
+<th>Quantity</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="transferTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- TRANSFER MODAL -->
+
+<div class="modal fade" id="transferModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5>New Transfer</h5>
+
+<button class="btn-close" data-bs-dismiss="modal"></button>
+
+</div>
+
+
+
+<div class="modal-body">
+
+
+<div class="mb-3">
+
+<label>Product</label>
+
+<select id="product" class="form-select"></select>
+
+</div>
+
+
+<div class="mb-3">
+
+<label>Source Warehouse</label>
+
+<select id="sourceWarehouse" class="form-select"></select>
+
+</div>
+
+
+<div class="mb-3">
+
+<label>Destination Warehouse</label>
+
+<select id="destinationWarehouse" class="form-select"></select>
+
+</div>
+
+
+<div class="mb-3">
+
+<label>Quantity</label>
+
+<input type="number" id="quantity" class="form-control">
+
+</div>
+
+
+</div>
+
+
+<div class="modal-footer">
+
+<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+<button class="btn btn-primary" onclick="createTransfer()">Transfer</button>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* LOAD PRODUCTS */
+
+async function loadProducts(){
+
+const res = await fetch("/api/v1/products",{
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+
+})
+
+const data = await res.json()
+
+let html=""
+
+data.forEach(p=>{
+
+html += `<option value="${p.id}">${p.name}</option>`
+
+})
+
+document.getElementById("product").innerHTML = html
+
+}
+
+
+
+/* LOAD WAREHOUSES */
+
+async function loadWarehouses(){
+
+const res = await fetch("/api/v1/warehouses",{
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+
+})
+
+const data = await res.json()
+
+let html=""
+
+data.forEach(w=>{
+
+html += `<option value="${w.id}">${w.name}</option>`
+
+})
+
+document.getElementById("sourceWarehouse").innerHTML = html
+
+document.getElementById("destinationWarehouse").innerHTML = html
+
+}
+
+
+
+/* CREATE TRANSFER */
+
+async function createTransfer(){
+
+const productId = document.getElementById("product").value
+
+const sourceWarehouse = document.getElementById("sourceWarehouse").value
+
+const destinationWarehouse = document.getElementById("destinationWarehouse").value
+
+const quantity = document.getElementById("quantity").value
+
+
+if(sourceWarehouse === destinationWarehouse){
+
+alert("Source and destination cannot be same")
+
+return
+
+}
+
+
+await fetch("/api/v1/transfers",{
+
+method:"POST",
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token"),
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+source_warehouse:parseInt(sourceWarehouse),
+
+destination_warehouse:parseInt(destinationWarehouse),
+
+items:[
+{
+product_id:parseInt(productId),
+quantity:parseInt(quantity)
+}
+]
+
+})
+
+})
+
+
+alert("Transfer completed")
+
+loadTransfers()
+
+}
+
+
+
+/* LOAD TRANSFERS */
+
+async function loadTransfers(){
+
+const res = await fetch("/api/v1/movements",{
+
+headers:{
+Authorization:"Bearer "+localStorage.getItem("token")
+}
+
+})
+
+const data = await res.json()
+
+let html=""
+
+
+data.forEach(m=>{
+
+if(m.movement_type !== "TRANSFER_OUT") return
+
+
+html += `
+
+<tr>
+
+<td>${m.product_name || "Product "+m.product_id}</td>
+
+<td>Warehouse ${m.source_warehouse || "-"}</td>
+
+<td>Warehouse ${m.destination_warehouse || "-"}</td>
+
+<td>${m.quantity}</td>
+
+<td><span class="badge bg-success">done</span></td>
+
+</tr>
+
+`
+
+})
+
+
+document.getElementById("transferTable").innerHTML = html
+
+}
+
+
+
+/* INIT PAGE */
+
+loadProducts()
+
+loadWarehouses()
+
+loadTransfers()
+
+</script>
+
+{% endblock %}
