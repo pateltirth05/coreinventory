@@ -13,6 +13,11 @@ from routes.alert_routes import router as alert_router
 from routes.operation_routes import router as operation_router
 from routes.password_routes import router as password_router
 from routes.profile_routes import router as profile_router
+
+
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+from fastapi.staticfiles import StaticFiles
 app = FastAPI(title="Inventory Management System")
 
 app.include_router(password_router)
@@ -32,3 +37,20 @@ app.include_router(profile_router)
 @app.get("/")
 def root():
     return {"message": "Inventory API running"}
+templates = Jinja2Templates(directory="templates")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+@app.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+@app.get("/dashboard")
+def dashboard_page(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+@app.get("/signup")
+def signup_page(request: Request):
+    return templates.TemplateResponse("signup.html", {"request": request})
+
+
+@app.get("/forgot-password")
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})

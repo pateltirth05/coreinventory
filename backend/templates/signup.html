@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Signup</title>
+<link rel="stylesheet" href="../static/css/style.css" />
+</head>
+
+<body >
+
+<div class="auth-layout">
+  <div class="auth-left">
+    <div style="margin-bottom:48px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M21 8L12 3 3 8m18 0v8l-9 5m9-13l-9 5M3 8l9 5M3 8v8l9 5m0-8V21"/></svg>
+        </div>
+        <span style="color:white;font-size:1rem;font-weight:600;">StockFlow</span>
+      </div>
+    </div>
+    <h2>Start managing<br/>your inventory<br/>smarter.</h2>
+    <p>Set up your workspace in minutes. No spreadsheets, no confusion — just clean, organized stock control.</p>
+    <div class="auth-features" style="margin-top:32px;">
+      <div class="auth-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Free to get started
+      </div>
+      <div class="auth-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Multi-warehouse ready
+      </div>
+      <div class="auth-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Role-based access control
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-box fade-in">
+      <div class="auth-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M21 8L12 3 3 8m18 0v8l-9 5m9-13l-9 5M3 8l9 5M3 8v8l9 5m0-8V21"/></svg>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:0.95rem;">StockFlow</div>
+          <div style="font-size:0.7rem;color:var(--text-3);">Inventory Management</div>
+        </div>
+      </div>
+
+      <h1>Create your account</h1>
+      <p class="sub">Fill in the details below to get started.</p>
+
+      <form id="signupForm">
+        <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:20px;">
+         
+          <div class="form-group">
+            <label class="form-label">Enter Your Name <span>*</span></label>
+<input 
+class="form-input"
+type="text"
+id="name"
+placeholder="Rohan"
+required
+minlength="3"
+maxlength="50"
+pattern="[A-Za-z\s]+"
+/>          </div>
+          <div class="form-group">
+            <label class="form-label"> Email <span>*</span></label>
+<input
+class="form-input"
+type="email"
+id="email"
+placeholder="rahul@sharma.com"
+required
+/>          </div>
+         
+     
+            <div class="form-group">
+              <label class="form-label">Password <span>*</span></label>
+<input
+class="form-input"
+type="password"
+id="password"
+placeholder="Min. 8 characters"
+required
+minlength="8"
+pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
+/>            </div>
+         
+      
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:10px;">
+          Create account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById("signupForm").addEventListener("submit", async function(e){
+
+e.preventDefault()
+
+const name = document.getElementById("name").value.trim()
+const email = document.getElementById("email").value.trim()
+const password = document.getElementById("password").value
+
+const nameRegex = /^[A-Za-z\s]{3,50}$/
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/
+
+if(!nameRegex.test(name)){
+alert("Name must contain only letters and be 3-50 characters.")
+return
+}
+
+if(!emailRegex.test(email)){
+alert("Please enter a valid email.")
+return
+}
+
+if(!passwordRegex.test(password)){
+alert("Password must be 8+ chars with uppercase, lowercase, number and special character.")
+return
+}
+
+const response = await fetch("/api/v1/auth/signup",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,email,password})
+})
+
+if(response.ok){
+
+alert("Account created successfully! Please login.")
+window.location.href="/login"
+
+}else{
+
+alert("Signup failed")
+
+}
+
+})
+</script>
+</body>
+</html>
