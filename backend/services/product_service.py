@@ -48,3 +48,27 @@ def update_product(db, product_id: int, product_data):
         "message": "Product updated",
         "product_id": product.id
     }
+
+
+def filter_products_by_category(db, category: str | None = None):
+
+    query = db.query(Product)
+
+    if category:
+        query = query.filter(Product.category == category)
+
+    products = query.all()
+
+    results = []
+
+    for p in products:
+        results.append({
+            "id": p.id,
+            "name": p.name,
+            "sku": p.sku,
+            "category": p.category,
+            "unit": p.unit,
+            "reorder_level": p.reorder_level
+        })
+
+    return results
