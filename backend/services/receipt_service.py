@@ -8,6 +8,7 @@ def create_receipt(db, receipt_data):
     operation = Operation(
         type="receipt",
         status="done",
+        supplier_name=receipt_data.supplier_name,
         destination_warehouse=receipt_data.destination_warehouse
     )
 

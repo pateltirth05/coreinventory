@@ -6,6 +6,7 @@ class ReceiptItem(BaseModel):
 
 
 class ReceiptCreate(BaseModel):
+    supplier_name: str
     destination_warehouse: int
     items: list[ReceiptItem]
 
