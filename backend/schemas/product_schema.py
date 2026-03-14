@@ -6,3 +6,10 @@ class ProductCreate(BaseModel):
     category: str | None = None
     unit: str | None = None
     reorder_level: int = 0
+
+class ProductUpdate(BaseModel):
+    name: str
+    sku: str
+    category: str | None = None
+    unit: str | None = None
+    reorder_level: int = 0

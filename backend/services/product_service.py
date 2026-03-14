@@ -26,3 +26,25 @@ def search_products(db, keyword: str):
         })
 
     return results
+
+
+def update_product(db, product_id: int, product_data):
+
+    product = db.query(Product).filter(Product.id == product_id).first()
+
+    if not product:
+        raise Exception("Product not found")
+
+    product.name = product_data.name
+    product.sku = product_data.sku
+    product.category = product_data.category
+    product.unit = product_data.unit
+    product.reorder_level = product_data.reorder_level
+
+    db.commit()
+    db.refresh(product)
+
+    return {
+        "message": "Product updated",
+        "product_id": product.id
+    }
