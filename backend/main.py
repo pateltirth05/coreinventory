@@ -11,6 +11,7 @@ from routes.auth_routes import router as auth_router
 from routes.movement_routes import router as movement_router
 from routes.alert_routes import router as alert_router
 from routes.operation_routes import router as operation_router
+from routes.profile_routes import router as profile_router
 app = FastAPI(title="Inventory Management System")
 
 app.include_router(operation_router)
@@ -25,6 +26,7 @@ app.include_router(dashboard_router)
 app.include_router(auth_router)
 app.include_router(movement_router)
 app.include_router(alert_router)
+app.include_router(profile_router)
 @app.get("/")
 def root():
     return {"message": "Inventory API running"}
